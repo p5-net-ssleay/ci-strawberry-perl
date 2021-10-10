@@ -68,7 +68,7 @@ jobs:
 
       - name: Start Process Monitor
         run: |
-          if (-not(Test-Path -Path Procmon64.exe -PathType Leaf) {
+          if (-not(Test-Path -Path Procmon64.exe -PathType Leaf)) {
             Invoke-WebRequest `
               -Uri https://download.sysinternals.com/files/ProcessMonitor.zip `
               -OutFile ProcessMonitor.zip
