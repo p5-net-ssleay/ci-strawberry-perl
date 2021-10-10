@@ -29,14 +29,14 @@ jobs:
             const { VERSION, FLAVOUR } = process.env;
 
             try {
-              const r = (await github.rest.repos.getReleaseByTag({
+              var r = (await github.rest.repos.getReleaseByTag({
                 owner: context.repo.owner,
                 repo:  context.repo.repo,
                 tag:   VERSION,
               })).data;
             } catch (e) {
               if (e.status == 404) {
-                const r = (await github.rest.repos.createRelease({
+                var r = (await github.rest.repos.createRelease({
                   owner:            context.repo.owner,
                   repo:             context.repo.repo,
                   tag_name:         VERSION,
