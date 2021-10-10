@@ -51,14 +51,14 @@ jobs:
             C:\strawberry\relocation.pl.bat
           }
 
-        if (Test-Path -Path C:\strawberry\c\bin\dmake.exe -PathType Leaf) {
-          $make = "C:\strawberry\c\bin\dmake.exe"
-        }
-        else {
-          $make = "C:\strawberry\c\bin\gmake.exe"
-        }
+          if (Test-Path -Path C:\strawberry\c\bin\dmake.exe -PathType Leaf) {
+            $make = "C:\strawberry\c\bin\dmake.exe"
+          }
+          else {
+            $make = "C:\strawberry\c\bin\gmake.exe"
+          }
 
-        $env:Path = "C:\strawberry\perl\bin;C:\strawberry\c\bin;$env:Path"
+          $env:Path = "C:\strawberry\perl\bin;C:\strawberry\c\bin;$env:Path"
 
       - name: Restore cached Process Monitor executable
         uses: actions/cache@v2
