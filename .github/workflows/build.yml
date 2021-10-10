@@ -26,6 +26,7 @@ jobs:
           FLAVOUR: ${{ matrix.flavour }}
         with:
           script: |
+            const { RequestError } = require("@octokit/request-error");
             const { VERSION, FLAVOUR } = process.env;
 
             try {
