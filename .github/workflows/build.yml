@@ -62,9 +62,9 @@ jobs:
 
       - name: Restore cached Process Monitor executable
         uses: actions/cache@v2
-          with:
-            path: Procmon64.exe
-            key: procmon
+        with:
+          path: Procmon64.exe
+          key: procmon
 
       - name: Start Process Monitor
         run: |
