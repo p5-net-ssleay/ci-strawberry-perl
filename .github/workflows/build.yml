@@ -5,9 +5,6 @@ on:
     branches:
       - master
 
-env:
-  GH_API_ROOT: https://api.github.com/repos/p5-net-ssleay/ci-strawberry-perl
-
 jobs:
   build:
     name: 'Strawberry Perl ${{ matrix.version }} ${{ matrix.flavour }}'
@@ -21,6 +18,74 @@ jobs:
           - x64
         #exclude:
     steps:
+      - name: Create GitHub release for Strawberry Perl ${{ matrix.version }}
+        uses: actions/github-script@v5
+        id: release
+        env:
+          VERSION: ${{ matrix.version }}
+          FLAVOUR: ${{ matrix.flavour }}
+        with:
+          script: |
+            const { VERSION, FLAVOUR } = process.env;
+
+            try {
+              const r = (await github.rest.repos.getReleaseByTag({
+                owner: context.repo.owner,
+                repo:  context.repo.repo,
+                tag:   VERSION,
+              })).data;
+            } catch (e) {
+              if (e instanceof RequestError && e.status == 404) {
+                const r = (await github.rest.repos.createRelease({
+                  owner:            context.repo.owner,
+                  repo:             context.repo.repo,
+                  tag_name:         VERSION,
+                  target_commitish: context.sha,
+                  name:             "Strawberry Perl " + VERSION,
+                  draft:            false,
+                  prerelease:       false,
+                })).data;
+              } else {
+                throw e;
+              }
+            }
+
+            const prefix = `strawberry-perl-${VERSION}-${FLAVOUR}`;
+            const upstream = r.assets.find(a => a.name == `${prefix}.upstream.zip`);
+            const minified = r.assets.find(a => a.name == `${prefix}.minified.zip`);
+
+            return {
+              release_id:        r.id,
+              target_commit:     r.target_commitish,
+              upstream_asset:    typeof upstream === "undefined" ? null : { id: upstream.id, url: upstream.browser_download_url },
+              minified_asset_id: typeof minified === "undefined" ? null : minified_asset.id,
+            };
+
+      - name: Update commit hash for ${{ matrix.version }} tag
+        if: ${{ github.sha != steps.release.outputs.target_commit }}
+        uses: actions/github-script@v5
+        with:
+          script: |
+            await github.rest.git.updateRef({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              ref:   VERSION,
+              sha:   context.sha,
+              force: true,
+            });
+
+      - name: Update target commit hash for GitHub release
+        if: ${{ github.sha != steps.release.outputs.target_commit }}
+        uses: actions/github-script@v5
+        with:
+          script: |
+            await github.rest.repos.updateRelease({
+              owner:            context.repo.owner,
+              repo:             context.repo.repo,
+              release_id:       ${{ steps.release.outputs.release_id }},
+              target_commitish: context.sha,
+            });
+
       - name: Check out ci-strawberry-perl
         uses: actions/checkout@v2
 
@@ -33,14 +98,19 @@ jobs:
 
       - name: Install Strawberry Perl ${{ matrix.version }} ${{ matrix.flavour }}
         run: |
-          $filename = switch ("${{ matrix.flavour }}") {
-            "x64"      { "strawberry-perl-${{ matrix.version }}-64bit.zip" }
-            "x86"      { "strawberry-perl-${{ matrix.version }}-32bit.zip" }
-            "x86_no64" { "strawberry-perl-no64-${{ matrix.version }}-32bit.zip" }
+          if ("${{ steps.release.outputs.upstream_asset.url }}" -eq "") {
+            $filename = switch ("${{ matrix.flavour }}") {
+              "x64"      { "strawberry-perl-${{ matrix.version }}-64bit.zip" }
+              "x86"      { "strawberry-perl-${{ matrix.version }}-32bit.zip" }
+              "x86_no64" { "strawberry-perl-no64-${{ matrix.version }}-32bit.zip" }
+            }
+            $url = "https://strawberryperl.com/download/${{ matrix.version }}/$filename"
+          } else {
+            $url = "${{ steps.release.outputs.upstream_asset.url }}"
           }
           
           Invoke-WebRequest `
-            -Uri https://strawberryperl.com/download/${{ matrix.version }}/$filename `
+            -Uri $url `
             -OutFile strawberry.zip
 
           Expand-Archive `
@@ -59,6 +129,24 @@ jobs:
           }
 
           $env:Path = "C:\strawberry\perl\bin;C:\strawberry\c\bin;$env:Path"
+
+      - name: Upload upstream Strawberry Perl ${{ matrix.version }} ${{ matrix.flavour }} archive as release artifact
+        if: ${{ steps.release.outputs.upstream_asset.id == "" }}
+        uses: actions/github-script@v5
+        env:
+          VERSION: ${{ matrix.version }}
+          FLAVOUR: ${{ matrix.flavour }}
+        with:
+          script: |
+            const { VERSION, FLAVOUR } = process.env;
+
+            await github.rest.repos.uploadReleaseAsset({
+              owner:      context.repo.owner,
+              repo:       context.repo.repo,
+              release_id: ${{ steps.release.outputs.release_id }},
+              name:       `strawberry-perl-${VERSION}-${FLAVOUR}.upstream.zip`,
+              data:       require("fs").readFileSync("strawberry.zip"),
+            });
 
       - name: Restore cached Process Monitor executable
         uses: actions/cache@v2
