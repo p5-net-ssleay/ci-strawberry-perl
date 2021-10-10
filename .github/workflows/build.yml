@@ -81,8 +81,16 @@ jobs:
               -Destination .
           }
 
-          Procmon64 /AcceptEula /LoadConfig strawberry.pmc /BackingFile test.pml /Quiet /Minimized
-          Procmon64 /AcceptEula /WaitForIdle
+          Start-Process `
+            -FilePath Procmon64.exe `
+            -ArgumentList "/AcceptEula /LoadConfig strawberry.pmc /BackingFile test.pml /Quiet /Minimized" `
+            -NoNewWindow
+
+          Start-Process `
+            -FilePath Procmon64.exe `
+            -ArgumentList "/AcceptEula /WaitForIdle" `
+            -NoNewWindow `
+            -Wait
 
       - name: Run Net-SSLeay test suite
         run: |
@@ -104,11 +112,19 @@ jobs:
 
       - name: Stop Process Monitor
         run: |
-          Procmon64 /AcceptEula /Terminate
+          Start-Process `
+            -FilePath Procmon64.exe `
+            -ArgumentList "/AcceptEula /Terminate" `
+            -NoNewWindow `
+            -Wait
 
       - name: Extract list of accessed Strawberry Perl paths
         run: |
-          Procmon64 /AcceptEula /OpenLog test.pml /SaveAs test.csv
+          Start-Process `
+            -FilePath Procmon64.exe `
+            -ArgumentList "/AcceptEula /OpenLog test.pml /SaveAs test.csv" `
+            -NoNewWindow `
+            -Wait
 
           Import-Csv test.csv | Select Path -Unique | Sort Path
 
