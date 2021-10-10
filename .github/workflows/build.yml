@@ -34,6 +34,8 @@ jobs:
                 repo:  context.repo.repo,
                 tag:   VERSION,
               })).data;
+              core.info("Release found");
+              core.info(r);
             } catch (e) {
               if (e.status == 404) {
                 var r = (await github.rest.repos.createRelease({
@@ -45,6 +47,8 @@ jobs:
                   draft:            false,
                   prerelease:       false,
                 })).data;
+                core.info("Release created");
+                core.info(r);
               } else {
                 throw e;
               }
