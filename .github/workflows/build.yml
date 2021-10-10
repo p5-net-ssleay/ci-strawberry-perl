@@ -75,16 +75,14 @@ jobs:
 
             Expand-Archive `
               -Path ProcessMonitor.zip
+
+            Move-Item `
+              -Path ProcessMonitor\Procmon64.exe `
+              -Destination .
           }
 
-          #Procmon64 /AcceptEula /LoadConfig strawberry.pmc /BackingFile test.pml /Quiet /Minimized
-          #Procmon64 /AcceptEula /WaitForIdle
-
-      - name: Debug shell
-        uses: mxschmitt/action-tmate@v3
-        with:
-          timeout-minutes: 10
-          limit-access-to-actor: true
+          Procmon64 /AcceptEula /LoadConfig strawberry.pmc /BackingFile test.pml /Quiet /Minimized
+          Procmon64 /AcceptEula /WaitForIdle
 
       - name: Run Net-SSLeay test suite
         run: |
@@ -117,5 +115,4 @@ jobs:
       - name: Debug shell
         uses: mxschmitt/action-tmate@v3
         with:
-          timeout-minutes: 10
           limit-access-to-actor: true
