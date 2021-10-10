@@ -40,7 +40,7 @@ jobs:
           }
           
           Invoke-WebRequest `
-            -Uri "https://strawberryperl.com/download/${{ matrix.version }}/$filename" `
+            -Uri https://strawberryperl.com/download/${{ matrix.version }}/$filename `
             -OutFile strawberry.zip
 
           Expand-Archive `
@@ -50,6 +50,63 @@ jobs:
           if (Test-Path -Path C:\strawberry\relocation.pl.bat -PathType Leaf) {
             C:\strawberry\relocation.pl.bat
           }
+
+        if (Test-Path -Path C:\strawberry\c\bin\dmake.exe -PathType Leaf) {
+          $make = "C:\strawberry\c\bin\dmake.exe"
+        }
+        else {
+          $make = "C:\strawberry\c\bin\gmake.exe"
+        }
+
+        $env:Path = "C:\strawberry\perl\bin;C:\strawberry\c\bin;$env:Path"
+
+      - name: Restore cached Process Monitor executable
+        uses: actions/cache@v2
+          with:
+            path: Procmon64.exe
+            key: procmon
+
+      - name: Start Process Monitor
+        run: |
+          if (-not(Test-Path -Path Procmon64.exe -PathType Leaf) {
+            Invoke-WebRequest `
+              -Uri https://download.sysinternals.com/files/ProcessMonitor.zip `
+              -OutFile ProcessMonitor.zip
+
+            Expand-Archive `
+              -Path ProcessMonitor.zip
+          }
+
+          Procmon64 /AcceptEula /LoadConfig strawberry.pmc /BackingFile test.pml /Quiet /Minimized
+          Procmon64 /AcceptEula /WaitForIdle
+
+      - name: Run Net-SSLeay test suite
+        run: |
+          cd p5-net-ssleay
+          echo n | perl Makefile.PL
+
+          Start-Process `
+            -FilePath $make `
+            -NoNewWindow `
+            -Wait
+
+          Start-Process `
+            -FilePath $make `
+            -ArgumentList "test" `
+            -NoNewWindow `
+            -Wait
+
+          cd ..
+
+      - name: Stop Process Monitor
+        run: |
+          Procmon64 /AcceptEula /Terminate
+
+      - name: Extract list of accessed Strawberry Perl paths
+        run: |
+          Procmon64 /AcceptEula /OpenLog test.pml /SaveAs test.csv
+
+          Import-Csv test.csv | Select Path -Unique | Sort Path
 
       - name: Debug shell
         uses: mxschmitt/action-tmate@v3
