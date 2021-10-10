@@ -37,6 +37,7 @@ jobs:
             "x64"      { "strawberry-perl-${{ matrix.version }}-64bit.zip" }
             "x86"      { "strawberry-perl-${{ matrix.version }}-32bit.zip" }
             "x86_no64" { "strawberry-perl-no64-${{ matrix.version }}-32bit.zip" }
+          }
           
           Invoke-WebRequest `
             -Uri "https://strawberryperl.com/download/${{ matrix.version }}/$filename" `
