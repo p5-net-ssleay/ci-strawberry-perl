@@ -1,0 +1,56 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  GH_API_ROOT: https://api.github.com/repos/p5-net-ssleay/ci-strawberry-perl
+
+jobs:
+  name: Version ${{ matrix.version }} ${{ matrix.flavour }}
+  runs-on: windows-2022
+  strategy:
+    fail-fast: false
+    matrix:
+      version:
+        - '5.24.1.1'
+      flavour:
+        - x64
+      #exclude:
+  steps:
+    - name: Check out ci-strawberry-perl
+      uses: actions/checkout@v2
+
+    - name: Check out p5-net-ssleay
+      uses: actions/checkout@v2
+      with:
+        repository: radiator-software/p5-net-ssleay
+        ref: master
+        path: p5-net-ssleay
+
+    - name: Install Strawberry Perl ${{ matrix.version }} ${{ matrix.flavour }}
+      run: |
+        $filename = switch ("${{ matrix.flavour }}") {
+          "x64"      { "strawberry-perl-${{ matrix.version }}-64bit.zip" }
+          "x86"      { "strawberry-perl-${{ matrix.version }}-32bit.zip" }
+          "x86_no64" { "strawberry-perl-no64-${{ matrix.version }}-32bit.zip" }
+          
+        Invoke-WebRequest `
+          -Uri "https://strawberryperl.com/download/${{ matrix.version }}/$filename" `
+          -OutFile strawberry.zip
+
+        Expand-Archive `
+          -Path strawberry.zip `
+          -DestinationPath C:\strawberry
+
+        if (Test-Path -Path C:\strawberry\relocation.pl.bat -PathType Leaf) {
+          C:\strawberry\relocation.pl.bat
+        }
+
+    - name: Debug shell
+      uses: mxschmitt/action-tmate@v3
+      with:
+        timeout-minutes: 10
+        limit-access-to-actor: true
