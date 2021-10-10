@@ -64,6 +64,8 @@ jobs:
       - name: Update commit hash for ${{ matrix.version }} tag
         if: ${{ github.sha != steps.release.outputs.target_commit }}
         uses: actions/github-script@v5
+        env:
+          VERSION: ${{ matrix.version }}
         with:
           script: |
             const { VERSION } = process.env;
@@ -79,8 +81,6 @@ jobs:
       - name: Update target commit hash for GitHub release
         if: ${{ github.sha != steps.release.outputs.target_commit }}
         uses: actions/github-script@v5
-        env:
-          VERSION: ${{ matrix.version }}
         with:
           script: |
             await github.rest.repos.updateRelease({
