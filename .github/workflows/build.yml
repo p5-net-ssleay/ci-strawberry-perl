@@ -26,7 +26,6 @@ jobs:
           FLAVOUR: ${{ matrix.flavour }}
         with:
           script: |
-            const { RequestError } = require("@octokit/request-error");
             const { VERSION, FLAVOUR } = process.env;
 
             try {
@@ -36,7 +35,7 @@ jobs:
                 tag:   VERSION,
               })).data;
             } catch (e) {
-              if (e instanceof RequestError && e.status == 404) {
+              if (e.status == 404) {
                 const r = (await github.rest.repos.createRelease({
                   owner:            context.repo.owner,
                   repo:             context.repo.repo,
