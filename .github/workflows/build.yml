@@ -10,7 +10,7 @@ env:
 
 jobs:
   build:
-    name: 'Version ${{ matrix.version }} ${{ matrix.flavour }}'
+    name: 'Strawberry Perl ${{ matrix.version }} ${{ matrix.flavour }}'
     runs-on: windows-2022
     strategy:
       fail-fast: false
@@ -77,8 +77,14 @@ jobs:
               -Path ProcessMonitor.zip
           }
 
-          Procmon64 /AcceptEula /LoadConfig strawberry.pmc /BackingFile test.pml /Quiet /Minimized
-          Procmon64 /AcceptEula /WaitForIdle
+          #Procmon64 /AcceptEula /LoadConfig strawberry.pmc /BackingFile test.pml /Quiet /Minimized
+          #Procmon64 /AcceptEula /WaitForIdle
+
+      - name: Debug shell
+        uses: mxschmitt/action-tmate@v3
+        with:
+          timeout-minutes: 10
+          limit-access-to-actor: true
 
       - name: Run Net-SSLeay test suite
         run: |
