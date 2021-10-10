@@ -131,7 +131,7 @@ jobs:
           $env:Path = "C:\strawberry\perl\bin;C:\strawberry\c\bin;$env:Path"
 
       - name: Upload upstream Strawberry Perl ${{ matrix.version }} ${{ matrix.flavour }} archive as release artifact
-        if: ${{ steps.release.outputs.upstream_asset.id == "" }}
+        if: ${{ steps.release.outputs.upstream_asset.id == null }}
         uses: actions/github-script@v5
         env:
           VERSION: ${{ matrix.version }}
