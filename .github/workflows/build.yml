@@ -191,6 +191,7 @@ jobs:
         run: |
           cd p5-net-ssleay
           Get-Command perl
+          $Env:Path
           echo n | perl Makefile.PL
 
           Start-Process `
