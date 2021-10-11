@@ -73,7 +73,7 @@ jobs:
             await github.rest.git.updateRef({
               owner: context.repo.owner,
               repo:  context.repo.repo,
-              ref:   VERSION,
+              ref:   `tags/${VERSION}`,
               sha:   context.sha,
               force: true,
             });
