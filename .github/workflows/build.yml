@@ -207,7 +207,7 @@ jobs:
           name: procmon-log
           path: test.pml
 
-      - name: Extract list of accessed Strawberry Perl paths
+      - name: Create minified Strawberry Perl ${{ matrix.version }} ${{ matrix.flavour }} archive
         run: |
           Start-Process `
             -FilePath Procmon64.exe `
@@ -215,4 +215,38 @@ jobs:
             -NoNewWindow `
             -Wait
 
-          Import-Csv test.csv | Select Path -Unique | Sort Path
+          # We can't add "Result is SUCCESS => Include" to the Procmon filter list, because this
+          # seems to make it discard all file system activity and report only process and thread
+          # activity - instead we need to check here whether the path exists (and also is a file,
+          # since directory activity is also reported)
+          $files = Import-Csv test.csv | Where { Test-Path -Path $_.Path -PathType Leaf } | Foreach { $_.Path } | Sort | Unique
+          Write-Output $files
+
+          $files | Foreach {
+            $dest = $_.Replace("C:\strawberry\", "strawberry.tmp\")
+            $null = New-Item -Force $dest
+            Copy-Item -Path $_ -Destination $dest
+          }
+
+          Compress-Archive `
+            -Path strawberry.tmp\* `
+            -DestinationPath strawberry-minified.zip `
+            -CompressionLevel Optimal
+
+      - name: Upload minified Strawberry Perl ${{ matrix.version }} ${{ matrix.flavour }} archive as release artifact
+        uses: actions/github-script@v5
+        env:
+          VERSION: ${{ matrix.version }}
+          FLAVOUR: ${{ matrix.flavour }}
+          RELEASE_ID: ${{ fromJson(steps.release.outputs.result).release_id }}
+        with:
+          script: |
+            const { VERSION, FLAVOUR, RELEASE_ID } = process.env;
+
+            await github.rest.repos.uploadReleaseAsset({
+              owner:      context.repo.owner,
+              repo:       context.repo.repo,
+              release_id: RELEASE_ID,
+              name:       `strawberry-perl-${VERSION}-${FLAVOUR}.minified.zip`,
+              data:       require("fs").readFileSync("strawberry-minified.zip"),
+            });
