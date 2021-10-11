@@ -156,15 +156,8 @@ jobs:
         run: |
           if (-not(Test-Path -Path Procmon64.exe -PathType Leaf)) {
             Invoke-WebRequest `
-              -Uri https://download.sysinternals.com/files/ProcessMonitor.zip `
-              -OutFile ProcessMonitor.zip
-
-            Expand-Archive `
-              -Path ProcessMonitor.zip
-
-            Move-Item `
-              -Path ProcessMonitor\Procmon64.exe `
-              -Destination .
+              -Uri https://live.sysinternals.com/Procmon64.exe `
+              -OutFile Procmon64.exe
           }
 
           Start-Process `
@@ -213,17 +206,23 @@ jobs:
             -NoNewWindow `
             -Wait
 
-      - name: Debug shell
-        uses: mxschmitt/action-tmate@v3
+      - name: Store Process Monitor log
+        uses: actions/upload-artifact@v2
         with:
-          limit-access-to-actor: true
+          name: procmon-log
+          path: test.pml
 
       - name: Extract list of accessed Strawberry Perl paths
         run: |
           Start-Process `
             -FilePath Procmon64.exe `
-            -ArgumentList "/AcceptEula /OpenLog test.pml /SaveAs test.csv" `
+            -ArgumentList "/AcceptEula /OpenLog test.pml /SaveApplyFilter /SaveAs test.csv /Quiet /Minimized" `
             -NoNewWindow `
             -Wait
 
           Import-Csv test.csv | Select Path -Unique | Sort Path
+
+      - name: Debug shell
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
