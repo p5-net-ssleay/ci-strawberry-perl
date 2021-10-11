@@ -190,8 +190,6 @@ jobs:
           $Env:Path = "C:\strawberry\perl\bin;C:\strawberry\c\bin;$Env:Path"
 
           cd p5-net-ssleay
-          Get-Command perl
-          $Env:Path
           echo n | perl Makefile.PL
 
           Start-Process `
