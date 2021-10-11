@@ -62,25 +62,23 @@ jobs:
             };
 
       - name: Update commit hash for ${{ matrix.version }} tag
-        if: ${{ github.sha != steps.release.outputs.target_commit }}
+        if: ${{ github.sha != fromJson(steps.release.outputs.result).target_commit }}
         uses: actions/github-script@v5
-        env:
-          VERSION: ${{ matrix.version }}
         with:
           script: |
             await github.rest.git.updateRef({
               owner: context.repo.owner,
               repo:  context.repo.repo,
-              ref:   `tags/${process.env.VERSION}`,
+              ref:   "tags/${{ matrix.version }}",
               sha:   context.sha,
               force: true,
             });
 
       - name: Update target commit hash for GitHub release
-        if: ${{ github.sha != steps.release.outputs.target_commit }}
+        if: ${{ github.sha != fromJson(steps.release.outputs.result).target_commit }}
         uses: actions/github-script@v5
         env:
-          RELEASE_ID: ${{ steps.release.outputs.release_id }}
+          RELEASE_ID: ${{ fromJson(steps.release.outputs.result).release_id }}
         with:
           script: |
             await github.rest.repos.updateRelease({
@@ -135,7 +133,7 @@ jobs:
           $env:Path = "C:\strawberry\perl\bin;C:\strawberry\c\bin;$env:Path"
 
       - name: Upload upstream Strawberry Perl ${{ matrix.version }} ${{ matrix.flavour }} archive as release artifact
-        if: ${{ steps.release.outputs.upstream_asset.id == null }}
+        if: ${{ fromJson(steps.release.outputs.result).upstream_asset.id == null }}
         uses: actions/github-script@v5
         env:
           VERSION: ${{ matrix.version }}
