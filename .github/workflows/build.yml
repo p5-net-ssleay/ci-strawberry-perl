@@ -201,12 +201,6 @@ jobs:
             -NoNewWindow `
             -Wait
 
-      - name: Store Process Monitor log
-        uses: actions/upload-artifact@v2
-        with:
-          name: procmon-log
-          path: test.pml
-
       - name: Create minified Strawberry Perl ${{ matrix.version }} ${{ matrix.flavour }} archive
         run: |
           Start-Process `
