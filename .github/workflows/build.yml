@@ -189,11 +189,6 @@ jobs:
 
           Start-Process `
             -FilePath $make `
-            -NoNewWindow `
-            -Wait
-
-          Start-Process `
-            -FilePath $make `
             -ArgumentList "test" `
             -NoNewWindow `
             -Wait
