@@ -190,6 +190,7 @@ jobs:
       - name: Run Net-SSLeay test suite
         run: |
           cd p5-net-ssleay
+          Get-Command perl
           echo n | perl Makefile.PL
 
           Start-Process `
