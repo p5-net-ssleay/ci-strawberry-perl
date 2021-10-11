@@ -13,10 +13,139 @@ jobs:
       fail-fast: false
       matrix:
         version:
+          - '5.8.8.2'
+          - '5.8.8.3'
+          - '5.8.8.4'
+          - '5.8.9.1'
+          - '5.8.9.2'
+          - '5.8.9.3'
+          - '5.8.9.4'
+          - '5.8.9.5'
+          - '5.10.0.2'
+          - '5.10.0.3'
+          - '5.10.0.4'
+          - '5.10.0.5'
+          - '5.10.0.6'
+          - '5.10.1.0'
+          - '5.10.1.1'
+          - '5.10.1.2'
+          - '5.10.1.3'
+          - '5.10.1.4'
+          - '5.10.1.5'
+          - '5.12.0.0'
+          - '5.12.0.1'
+          - '5.12.1.0'
+          - '5.12.2.0'
+          - '5.12.3.0'
+          - '5.14.2.1'
+          - '5.14.3.1'
+          - '5.14.4.1'
+          - '5.16.0.1'
+          - '5.16.1.1'
+          - '5.16.2.1'
+          - '5.16.2.2'
+          - '5.16.3.1'
+          - '5.18.0.1'
+          - '5.18.1.1'
+          - '5.18.2.1'
+          - '5.18.2.2'
+          - '5.18.4.1'
+          - '5.20.0.1'
+          - '5.20.1.1'
+          - '5.20.2.1'
+          - '5.20.3.1'
+          - '5.20.3.2'
+          - '5.20.3.3'
+          - '5.22.0.1'
+          - '5.22.1.1'
+          - '5.22.1.2'
+          - '5.22.1.3'
+          - '5.22.2.1'
+          - '5.22.3.1'
+          - '5.24.0.1'
           - '5.24.1.1'
+          - '5.24.2.1'
+          - '5.24.3.1'
+          - '5.24.4.1'
+          - '5.26.0.1'
+          - '5.26.0.2'
+          - '5.26.1.1'
+          - '5.26.2.1'
+          - '5.26.3.1'
+          - '5.28.0.1'
+          - '5.28.1.1'
+          - '5.28.2.1'
+          - '5.30.0.1'
+          - '5.30.1.1'
+          - '5.30.2.1'
+          - '5.30.3.1'
+          - '5.32.0.1'
+          - '5.32.1.1'
         flavour:
+          # 64bit
           - x64
-        #exclude:
+          # 32bit / with USE_64_BIT_INT
+          - x86_64bitint
+          # 32bit / without USE_64_BIT_INT
+          - x86_no64bitint
+        exclude:
+          # 32bit / with USE_64_BIT_INT flavour is available from version 5.18.0.1 onwards
+          - { version: '5.8.8.2', flavour: x86_64bitint }
+          - { version: '5.8.8.3', flavour: x86_64bitint }
+          - { version: '5.8.8.4', flavour: x86_64bitint }
+          - { version: '5.8.9.1', flavour: x86_64bitint }
+          - { version: '5.8.9.2', flavour: x86_64bitint }
+          - { version: '5.8.9.3', flavour: x86_64bitint }
+          - { version: '5.8.9.4', flavour: x86_64bitint }
+          - { version: '5.8.9.5', flavour: x86_64bitint }
+          - { version: '5.10.0.2', flavour: x86_64bitint }
+          - { version: '5.10.0.3', flavour: x86_64bitint }
+          - { version: '5.10.0.4', flavour: x86_64bitint }
+          - { version: '5.10.0.5', flavour: x86_64bitint }
+          - { version: '5.10.0.6', flavour: x86_64bitint }
+          - { version: '5.10.1.0', flavour: x86_64bitint }
+          - { version: '5.10.1.1', flavour: x86_64bitint }
+          - { version: '5.10.1.2', flavour: x86_64bitint }
+          - { version: '5.10.1.3', flavour: x86_64bitint }
+          - { version: '5.10.1.4', flavour: x86_64bitint }
+          - { version: '5.10.1.5', flavour: x86_64bitint }
+          - { version: '5.12.0.0', flavour: x86_64bitint }
+          - { version: '5.12.0.1', flavour: x86_64bitint }
+          - { version: '5.12.1.0', flavour: x86_64bitint }
+          - { version: '5.12.2.0', flavour: x86_64bitint }
+          - { version: '5.12.3.0', flavour: x86_64bitint }
+          - { version: '5.14.2.1', flavour: x86_64bitint }
+          - { version: '5.14.3.1', flavour: x86_64bitint }
+          - { version: '5.14.4.1', flavour: x86_64bitint }
+          - { version: '5.16.0.1', flavour: x86_64bitint }
+          - { version: '5.16.1.1', flavour: x86_64bitint }
+          - { version: '5.16.2.1', flavour: x86_64bitint }
+          - { version: '5.16.2.2', flavour: x86_64bitint }
+          - { version: '5.16.3.1', flavour: x86_64bitint }
+          # 64bit flavour is available from version 5.12.3.0 onwards
+          - { version: '5.8.8.2', flavour: x64 }
+          - { version: '5.8.8.3', flavour: x64 }
+          - { version: '5.8.8.4', flavour: x64 }
+          - { version: '5.8.9.1', flavour: x64 }
+          - { version: '5.8.9.2', flavour: x64 }
+          - { version: '5.8.9.3', flavour: x64 }
+          - { version: '5.8.9.4', flavour: x64 }
+          - { version: '5.8.9.5', flavour: x64 }
+          - { version: '5.10.0.2', flavour: x64 }
+          - { version: '5.10.0.3', flavour: x64 }
+          - { version: '5.10.0.4', flavour: x64 }
+          - { version: '5.10.0.5', flavour: x64 }
+          - { version: '5.10.0.6', flavour: x64 }
+          - { version: '5.10.1.0', flavour: x64 }
+          - { version: '5.10.1.1', flavour: x64 }
+          - { version: '5.10.1.2', flavour: x64 }
+          - { version: '5.10.1.3', flavour: x64 }
+          - { version: '5.10.1.4', flavour: x64 }
+          - { version: '5.10.1.5', flavour: x64 }
+          - { version: '5.12.0.0', flavour: x64 }
+          - { version: '5.12.0.1', flavour: x64 }
+          - { version: '5.12.1.0', flavour: x64 }
+          - { version: '5.12.2.0', flavour: x64 }
     steps:
       - name: Create GitHub release for Strawberry Perl ${{ matrix.version }}
         uses: actions/github-script@v5
@@ -105,10 +234,41 @@ jobs:
           UPSTREAM_URL: ${{ fromJson(steps.release.outputs.result).upstream_asset.url }}
         run: |
           if ($Env:UPSTREAM_URL -eq "") {
+            ($major, $minor, $patch, $build) = $Env:VERSION.Split(".")
+
             $filename = switch ($Env:FLAVOUR) {
-              "x64"      { "strawberry-perl-$Env:VERSION-64bit.zip" }
-              "x86"      { "strawberry-perl-$Env:VERSION-32bit.zip" }
-              "x86_no64" { "strawberry-perl-no64-$Env:VERSION-32bit.zip" }
+              "x64" {
+                if ($major -ge 5 -and $minor -ge 12 -and $patch -ge 3) {
+                  "strawberry-perl-$Env:VERSION-64bit.zip"
+                } else {
+                  # x64 flavour is not available before 5.12.3.0
+                  throw "x64 flavour not available for Strawberry Perl $Env:VERSION"
+                }
+              }
+              "x86_64bitint" {
+                if ($major -ge 5 -and $minor -ge 18) {
+                  "strawberry-perl-$Env:VERSION-32bit.zip"
+                } else {
+                  # x86_64bitint flavour is not available before 5.18.0.1
+                  throw "x86_64bitint flavour not available for Strawberry Perl $Env:VERSION"
+                }
+              }
+              "x86_no64bitint" {
+                if ($major -le 5 -and $minor -le 12 -and $patch -le 3) {
+                  "strawberry-perl-$Env:VERSION.zip"
+                } elseif ($major -le 5 -and $minor -le 18) {
+                  # The "-32bit" suffix was added in 5.14.2.1, but denotes the x86_64bitint
+                  # flavour from 5.18.0.1 onwards
+                  "strawberry-perl-$Env:VERSION-32bit.zip"
+                } elseif ($major -ge 5 -and $minor -ge 18 -and $patch -ge 2 -and $build -ge 1) {
+                  # The "-no64-" identifier was added in 5.18.2.1 to differentiate the
+                  # x86_64bitint and x86_no64bitint flavours
+                  "strawberry-perl-no64-$Env:VERSION-32bit.zip"
+                } else {
+                  # x86_no64bitint flavour is not available for 5.18.0.1 and 5.18.1.1
+                  throw "x86_no64bitint flavour not available for Strawberry Perl $Env:VERSION"
+                }
+              }
             }
             $url = "https://strawberryperl.com/download/$Env:VERSION/$filename"
           } else {
