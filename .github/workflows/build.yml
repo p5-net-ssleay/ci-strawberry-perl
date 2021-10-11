@@ -211,18 +211,3 @@ jobs:
         with:
           name: procmon-log
           path: test.pml
-
-      - name: Extract list of accessed Strawberry Perl paths
-        run: |
-          Start-Process `
-            -FilePath Procmon64.exe `
-            -ArgumentList "/AcceptEula /OpenLog test.pml /SaveApplyFilter /SaveAs test.csv /Quiet /Minimized" `
-            -NoNewWindow `
-            -Wait
-
-          Import-Csv test.csv | Select Path -Unique | Sort Path
-
-      - name: Debug shell
-        uses: mxschmitt/action-tmate@v3
-        with:
-          limit-access-to-actor: true
