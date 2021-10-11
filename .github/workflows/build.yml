@@ -127,15 +127,6 @@ jobs:
             C:\strawberry\relocation.pl.bat
           }
 
-          if (Test-Path -Path C:\strawberry\c\bin\dmake.exe -PathType Leaf) {
-            $make = "C:\strawberry\c\bin\dmake.exe"
-          }
-          else {
-            $make = "C:\strawberry\c\bin\gmake.exe"
-          }
-
-          $Env:Path = "C:\strawberry\perl\bin;C:\strawberry\c\bin;$Env:Path"
-
       - name: Upload upstream Strawberry Perl ${{ matrix.version }} ${{ matrix.flavour }} archive as release artifact
         if: ${{ fromJson(steps.release.outputs.result).upstream_asset.id == null }}
         uses: actions/github-script@v5
@@ -189,6 +180,15 @@ jobs:
 
       - name: Run Net-SSLeay test suite
         run: |
+          if (Test-Path -Path C:\strawberry\c\bin\dmake.exe -PathType Leaf) {
+            $make = "C:\strawberry\c\bin\dmake.exe"
+          }
+          else {
+            $make = "C:\strawberry\c\bin\gmake.exe"
+          }
+
+          $Env:Path = "C:\strawberry\perl\bin;C:\strawberry\c\bin;$Env:Path"
+
           cd p5-net-ssleay
           Get-Command perl
           $Env:Path
