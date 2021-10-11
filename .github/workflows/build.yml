@@ -99,16 +99,20 @@ jobs:
           path: p5-net-ssleay
 
       - name: Install Strawberry Perl ${{ matrix.version }} ${{ matrix.flavour }}
+        env:
+          VERSION: ${{ matrix.version }}
+          FLAVOUR: ${{ matrix.flavour }}
+          UPSTREAM_URL: ${{ fromJson(steps.release.outputs.result).upstream_asset.url }}
         run: |
-          if ("${{ steps.release.outputs.upstream_asset.url }}" -eq "") {
-            $filename = switch ("${{ matrix.flavour }}") {
-              "x64"      { "strawberry-perl-${{ matrix.version }}-64bit.zip" }
-              "x86"      { "strawberry-perl-${{ matrix.version }}-32bit.zip" }
-              "x86_no64" { "strawberry-perl-no64-${{ matrix.version }}-32bit.zip" }
+          if ($Env:UPSTREAM_URL -eq "") {
+            $filename = switch ($Env:FLAVOUR) {
+              "x64"      { "strawberry-perl-$Env:VERSION-64bit.zip" }
+              "x86"      { "strawberry-perl-$Env:VERSION-32bit.zip" }
+              "x86_no64" { "strawberry-perl-no64-$Env:VERSION-32bit.zip" }
             }
-            $url = "https://strawberryperl.com/download/${{ matrix.version }}/$filename"
+            $url = "https://strawberryperl.com/download/$Env:VERSION/$filename"
           } else {
-            $url = "${{ fromJson(steps.release.outputs.result).upstream_asset.url }}"
+            $url = $Env:UPSTREAM_URL
           }
           
           Invoke-WebRequest `
@@ -130,7 +134,7 @@ jobs:
             $make = "C:\strawberry\c\bin\gmake.exe"
           }
 
-          $env:Path = "C:\strawberry\perl\bin;C:\strawberry\c\bin;$env:Path"
+          $Env:Path = "C:\strawberry\perl\bin;C:\strawberry\c\bin;$Env:Path"
 
       - name: Upload upstream Strawberry Perl ${{ matrix.version }} ${{ matrix.flavour }} archive as release artifact
         if: ${{ fromJson(steps.release.outputs.result).upstream_asset.id == null }}
@@ -141,12 +145,12 @@ jobs:
           RELEASE_ID: ${{ fromJson(steps.release.outputs.result).release_id }}
         with:
           script: |
-            const { VERSION, FLAVOUR } = process.env;
+            const { VERSION, FLAVOUR, RELEASE_ID } = process.env;
 
             await github.rest.repos.uploadReleaseAsset({
               owner:      context.repo.owner,
               repo:       context.repo.repo,
-              release_id: process.env.RELEASE_ID,
+              release_id: RELEASE_ID,
               name:       `strawberry-perl-${VERSION}-${FLAVOUR}.upstream.zip`,
               data:       require("fs").readFileSync("strawberry.zip"),
             });
