@@ -223,13 +223,13 @@ jobs:
           Write-Output $files
 
           $files | Foreach {
-            $dest = $_.Replace("C:\strawberry\", "strawberry.tmp\")
+            $dest = $_.Replace("C:\strawberry\", "strawberry-minified\")
             $null = New-Item -Force $dest
             Copy-Item -Path $_ -Destination $dest
           }
 
           Compress-Archive `
-            -Path strawberry.tmp\* `
+            -Path strawberry-minified\* `
             -DestinationPath strawberry-minified.zip `
             -CompressionLevel Optimal
 
