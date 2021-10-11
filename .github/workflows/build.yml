@@ -108,7 +108,7 @@ jobs:
             }
             $url = "https://strawberryperl.com/download/${{ matrix.version }}/$filename"
           } else {
-            $url = "${{ steps.release.outputs.upstream_asset.url }}"
+            $url = "${{ fromJson(steps.release.outputs.result).upstream_asset.url }}"
           }
           
           Invoke-WebRequest `
@@ -138,6 +138,7 @@ jobs:
         env:
           VERSION: ${{ matrix.version }}
           FLAVOUR: ${{ matrix.flavour }}
+          RELEASE_ID: ${{ fromJson(steps.release.outputs.result).release_id }}
         with:
           script: |
             const { VERSION, FLAVOUR } = process.env;
@@ -145,7 +146,7 @@ jobs:
             await github.rest.repos.uploadReleaseAsset({
               owner:      context.repo.owner,
               repo:       context.repo.repo,
-              release_id: ${{ steps.release.outputs.release_id }},
+              release_id: process.env.RELEASE_ID,
               name:       `strawberry-perl-${VERSION}-${FLAVOUR}.upstream.zip`,
               data:       require("fs").readFileSync("strawberry.zip"),
             });
