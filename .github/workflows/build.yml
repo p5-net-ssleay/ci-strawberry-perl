@@ -147,29 +147,20 @@ jobs:
             });
 
       - name: Restore cached Process Monitor executable
+        id: procmon
         uses: actions/cache@v2
         with:
           path: Procmon64.exe
           key: procmon
 
-      - name: Start Process Monitor
+      - name: Download Process Monitor
+        if: ${{ steps.procmon.outputs.cache-hit != 'true' }}
         run: |
           if (-not(Test-Path -Path Procmon64.exe -PathType Leaf)) {
             Invoke-WebRequest `
               -Uri https://live.sysinternals.com/Procmon64.exe `
               -OutFile Procmon64.exe
           }
-
-          Start-Process `
-            -FilePath Procmon64.exe `
-            -ArgumentList "/AcceptEula /LoadConfig strawberry.pmc /BackingFile test.pml /Quiet /Minimized" `
-            -NoNewWindow
-
-          Start-Process `
-            -FilePath Procmon64.exe `
-            -ArgumentList "/AcceptEula /WaitForIdle" `
-            -NoNewWindow `
-            -Wait
 
       - name: Run Net-SSLeay test suite
         run: |
@@ -181,6 +172,17 @@ jobs:
           }
 
           $Env:Path = "C:\strawberry\perl\bin;C:\strawberry\c\bin;$Env:Path"
+
+          Start-Process `
+            -FilePath Procmon64.exe `
+            -ArgumentList "/AcceptEula /LoadConfig strawberry.pmc /BackingFile test.pml /Quiet /Minimized" `
+            -NoNewWindow
+
+          Start-Process `
+            -FilePath Procmon64.exe `
+            -ArgumentList "/AcceptEula /WaitForIdle" `
+            -NoNewWindow `
+            -Wait
 
           cd p5-net-ssleay
           echo n | perl Makefile.PL
@@ -198,8 +200,6 @@ jobs:
 
           cd ..
 
-      - name: Stop Process Monitor
-        run: |
           Start-Process `
             -FilePath Procmon64.exe `
             -ArgumentList "/AcceptEula /Terminate" `
@@ -211,3 +211,13 @@ jobs:
         with:
           name: procmon-log
           path: test.pml
+
+      - name: Extract list of accessed Strawberry Perl paths
+        run: |
+          Start-Process `
+            -FilePath Procmon64.exe `
+            -ArgumentList "/AcceptEula /OpenLog test.pml /SaveAs test.csv /Quiet /Minimized" `
+            -NoNewWindow `
+            -Wait
+
+          Import-Csv test.csv | Select Path -Unique | Sort Path
