@@ -183,12 +183,22 @@ jobs:
             const upstream = r.assets.find(a => a.name == `${prefix}.upstream.zip`);
             const minified = r.assets.find(a => a.name == `${prefix}.minified.zip`);
 
-            return {
-              release_id:        r.id,
-              target_commit:     r.target_commitish,
-              upstream_asset:    typeof upstream === "undefined" ? null : { id: upstream.id, url: upstream.browser_download_url },
-              minified_asset_id: typeof minified === "undefined" ? null : minified_asset.id,
-            };
+            console.log(JSON.stringify(upstream));
+            console.log(JSON.stringify(minified));
+
+            core.setOutput("release_id", r.id);
+            core.setOutput("target_commit", r.target_commitish);
+
+            if (typeof upstream !== "undefined") {
+              core.setOutput("upstream_asset", {
+                id:  upstream.id,
+                url: upstream.browser_download_url,
+              });
+            }
+
+            if (typeof minified !== "undefined") {
+              core.setOutput("minified_asset_id", minified_asset.id);
+            }
 
       - name: Update commit hash for ${{ matrix.version }} tag
         if: ${{ github.sha != fromJson(steps.release.outputs.result).target_commit }}
