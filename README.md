@@ -2,8 +2,8 @@
 
 This repository hosts ZIP files containing the minimum subset of files in a
 [Strawberry Perl](https://strawberryperl.com) release that is required to run
-[Net-SSLeay](https://github.com/radiator-software/p5-net-ssleay). They are
-designed to be used for testing Net-SSLeay on Windows
+the [Net-SSLeay](https://github.com/radiator-software/p5-net-ssleay) test suite.
+They are designed to be used for testing Net-SSLeay on Windows
 [GitHub Actions](https://github.com/features/actions) runners, and will almost
 certainly not be useful for any other purpose.
 
