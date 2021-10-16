@@ -426,7 +426,7 @@ jobs:
             -CompressionLevel Optimal `
             -PassThru
 
-          Write-Output "Minified archive is {0} bytes ({1:n2} MB)" -f ($minified.Length, $minified.Length / 1MB)
+          Write-Output "Minified archive is {0} bytes ({1:n2} MB)" -f ($minified.Length, ($minified.Length / 1MB))
 
       - name: Upload minified Strawberry Perl ${{ matrix.version }} ${{ matrix.flavour }} archive as release artifact
         uses: actions/github-script@v5
