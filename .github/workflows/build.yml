@@ -187,10 +187,8 @@ jobs:
             core.setOutput("target_commit", r.target_commitish);
 
             if (typeof upstream !== "undefined") {
-              core.setOutput("upstream_asset", {
-                id:  upstream.id,
-                url: upstream.browser_download_url,
-              });
+              core.setOutput("upstream_asset_id", upstream.id);
+              core.setOutput("upstream_asset_url", upstream.browser_download_url);
             }
 
             if (typeof minified !== "undefined") {
@@ -240,7 +238,7 @@ jobs:
         env:
           VERSION: ${{ matrix.version }}
           FLAVOUR: ${{ matrix.flavour }}
-          UPSTREAM_URL: ${{ steps.release.outputs.upstream_asset.url }}
+          UPSTREAM_URL: ${{ steps.release.outputs.upstream_asset_url }}
         run: |
           if ($Env:UPSTREAM_URL -eq "") {
             $version = [System.Version]$Env:VERSION
@@ -303,7 +301,7 @@ jobs:
           }
 
       - name: Upload upstream Strawberry Perl ${{ matrix.version }} ${{ matrix.flavour }} archive as release artifact
-        if: ${{ steps.release.outputs.upstream_asset == null }}
+        if: ${{ steps.release.outputs.upstream_asset_url == null }}
         uses: actions/github-script@v5
         env:
           VERSION: ${{ matrix.version }}
