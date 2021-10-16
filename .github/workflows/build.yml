@@ -428,6 +428,19 @@ jobs:
 
           Write-Output ("Minified archive is {0} bytes ({1:n2} MB)" -f ($minified.Length, ($minified.Length / 1MB)))
 
+      - name: Delete existing minified Strawberry Perl ${{ matrix.version }} ${{ matrix.flavour }} archive from release artifacts
+        if: ${{ steps.release.outputs.minified_asset_id != null }}
+        uses: actions/github-script@v5
+        env:
+          ASSET_ID: ${{ steps.release.outputs.minified_asset_id }}
+        with:
+          script: |
+            await github.rest.repos.deleteReleaseAsset({
+              owner:    context.repo.owner,
+              repo:     context.repo.repo,
+              asset_id: process.env.ASSET_ID,
+            });
+
       - name: Upload minified Strawberry Perl ${{ matrix.version }} ${{ matrix.flavour }} archive as release artifact
         uses: actions/github-script@v5
         env:
