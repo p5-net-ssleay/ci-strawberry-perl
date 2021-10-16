@@ -378,7 +378,7 @@ jobs:
             -PassThru
 
           if ($proc_makefile.ExitCode -ne 0) {
-            throw "`perl Makefile.PL` failed (exit code: $proc_makefile.ExitCode)"
+            throw "`perl Makefile.PL` failed (exit code: $($proc_makefile.ExitCode))"
           }
 
           $proc_build = Start-Process `
@@ -389,7 +389,7 @@ jobs:
             -PassThru
 
           if ($proc_build.ExitCode -ne 0) {
-            throw "`$make test` failed (exit code: $proc_build.ExitCode)"
+            throw "`$make test` failed (exit code: $($proc_build.ExitCode))"
           }
 
           cd ..
