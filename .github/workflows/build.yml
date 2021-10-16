@@ -283,6 +283,8 @@ jobs:
           } else {
             $url = $Env:UPSTREAM_URL
           }
+
+          Write-Output "Downloading Strawberry Perl from $url"
           
           Invoke-WebRequest `
             -Uri $url `
@@ -293,9 +295,11 @@ jobs:
             -DestinationPath C:\strawberry
 
           if (Test-Path -Path C:\strawberry\relocation.pl.bat -PathType Leaf) {
+            Write-Output "Relocating Strawberry Perl (C:\strawberry\relocation.pl.bat)"
             C:\strawberry\relocation.pl.bat
           } elseif (Test-Path -Path C:\strawberry\relocation.pl -PathType Leaf) {
-            C:\strawberry\perl\bin\perl C:\strawberry\relocation.pl
+            Write-Output "Relocating Strawberry Perl (C:\strawberry\relocation.pl)"
+            C:\strawberry\perl\bin\perl.exe C:\strawberry\relocation.pl
           }
 
       - name: Upload upstream Strawberry Perl ${{ matrix.version }} ${{ matrix.flavour }} archive as release artifact
