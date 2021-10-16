@@ -198,23 +198,25 @@ jobs:
             }
 
       - name: Update commit hash for ${{ matrix.version }} tag
-        if: ${{ github.sha != fromJson(steps.release.outputs.result).target_commit }}
+        if: ${{ github.sha != steps.release.outputs.target_commit }}
         uses: actions/github-script@v5
+        env:
+          VERSION: ${{ matrix.version }}
         with:
           script: |
             await github.rest.git.updateRef({
               owner: context.repo.owner,
               repo:  context.repo.repo,
-              ref:   "tags/${{ matrix.version }}",
+              ref:   `tags/${process.env.VERSION}`,
               sha:   context.sha,
               force: true,
             });
 
       - name: Update target commit hash for GitHub release
-        if: ${{ github.sha != fromJson(steps.release.outputs.result).target_commit }}
+        if: ${{ github.sha != steps.release.outputs.target_commit }}
         uses: actions/github-script@v5
         env:
-          RELEASE_ID: ${{ fromJson(steps.release.outputs.result).release_id }}
+          RELEASE_ID: ${{ steps.release.outputs.release_id }}
         with:
           script: |
             await github.rest.repos.updateRelease({
@@ -238,7 +240,7 @@ jobs:
         env:
           VERSION: ${{ matrix.version }}
           FLAVOUR: ${{ matrix.flavour }}
-          UPSTREAM_URL: ${{ fromJson(steps.release.outputs.result).upstream_asset.url }}
+          UPSTREAM_URL: ${{ steps.release.outputs.upstream_asset.url }}
         run: |
           if ($Env:UPSTREAM_URL -eq "") {
             ($major, $minor, $patch, $build) = $Env:VERSION.Split(".")
@@ -297,12 +299,12 @@ jobs:
           }
 
       - name: Upload upstream Strawberry Perl ${{ matrix.version }} ${{ matrix.flavour }} archive as release artifact
-        if: ${{ fromJson(steps.release.outputs.result).upstream_asset.id == null }}
+        if: ${{ steps.release.outputs.upstream_asset == null }}
         uses: actions/github-script@v5
         env:
           VERSION: ${{ matrix.version }}
           FLAVOUR: ${{ matrix.flavour }}
-          RELEASE_ID: ${{ fromJson(steps.release.outputs.result).release_id }}
+          RELEASE_ID: ${{ steps.release.outputs.release_id }}
         with:
           script: |
             const { VERSION, FLAVOUR, RELEASE_ID } = process.env;
@@ -423,7 +425,7 @@ jobs:
         env:
           VERSION: ${{ matrix.version }}
           FLAVOUR: ${{ matrix.flavour }}
-          RELEASE_ID: ${{ fromJson(steps.release.outputs.result).release_id }}
+          RELEASE_ID: ${{ steps.release.outputs.release_id }}
         with:
           script: |
             const { VERSION, FLAVOUR, RELEASE_ID } = process.env;
