@@ -146,6 +146,15 @@ jobs:
           - { version: '5.12.0.1', flavour: x64 }
           - { version: '5.12.1.0', flavour: x64 }
           - { version: '5.12.2.0', flavour: x64 }
+          # Net-SSLeay support for all x86 flavours of versions between 5.30.0.1 and 5.30.2.1 has
+          # been withdrawn because they ship with a broken copy of OpenSSL - see
+          # https://github.com/radiator-software/p5-net-ssleay/issues/179
+          - { version: '5.30.0.1', flavour: x86_64bitint }
+          - { version: '5.30.0.1', flavour: x86_no64bitint }
+          - { version: '5.30.1.1', flavour: x86_64bitint }
+          - { version: '5.30.1.1', flavour: x86_no64bitint }
+          - { version: '5.30.2.1', flavour: x86_64bitint }
+          - { version: '5.30.2.1', flavour: x86_no64bitint }
     steps:
       - name: Create GitHub release for Strawberry Perl ${{ matrix.version }}
         uses: actions/github-script@v5
