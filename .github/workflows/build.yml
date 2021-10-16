@@ -243,12 +243,11 @@ jobs:
           UPSTREAM_URL: ${{ steps.release.outputs.upstream_asset.url }}
         run: |
           if ($Env:UPSTREAM_URL -eq "") {
-            ($major, $minor, $patch, $build) = $Env:VERSION.Split(".")
-            Write-Output "$major, $minor, $patch, $build"
+            $version = [System.Version]$Env:VERSION
 
             $filename = switch ($Env:FLAVOUR) {
               "x64" {
-                if ($major -ge 5 -and $minor -ge 12 -and $patch -ge 3) {
+                if ($version -ge [System.Version]"5.12.3.0") {
                   "strawberry-perl-$Env:VERSION-64bit.zip"
                 } else {
                   # x64 flavour is not available before 5.12.3.0
@@ -256,7 +255,7 @@ jobs:
                 }
               }
               "x86_64bitint" {
-                if ($major -ge 5 -and $minor -ge 18) {
+                if ($version -ge [System.Version]"5.18.0.1") {
                   "strawberry-perl-$Env:VERSION-32bit.zip"
                 } else {
                   # x86_64bitint flavour is not available before 5.18.0.1
@@ -264,13 +263,13 @@ jobs:
                 }
               }
               "x86_no64bitint" {
-                if ($major -le 5 -and $minor -le 12 -and $patch -le 3) {
+                if ($version -le [System.Version]"5.12.3.0") {
                   "strawberry-perl-$Env:VERSION.zip"
-                } elseif ($major -le 5 -and $minor -le 18) {
+                } elseif ($version -lt [System.Version]"5.18.0.1") {
                   # The "-32bit" suffix was added in 5.14.2.1, but denotes the x86_64bitint
                   # flavour from 5.18.0.1 onwards
                   "strawberry-perl-$Env:VERSION-32bit.zip"
-                } elseif ($major -ge 5 -and $minor -ge 18 -and $patch -ge 2 -and $build -ge 1) {
+                } elseif ($version -ge [System.Version]"5.18.2.1") {
                   # The "-no64-" identifier was added in 5.18.2.1 to differentiate the
                   # x86_64bitint and x86_no64bitint flavours
                   "strawberry-perl-no64-$Env:VERSION-32bit.zip"
