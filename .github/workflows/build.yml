@@ -183,9 +183,6 @@ jobs:
             const upstream = r.assets.find(a => a.name == `${prefix}.upstream.zip`);
             const minified = r.assets.find(a => a.name == `${prefix}.minified.zip`);
 
-            console.log(JSON.stringify(upstream));
-            console.log(JSON.stringify(minified));
-
             core.setOutput("release_id", r.id);
             core.setOutput("target_commit", r.target_commitish);
 
@@ -197,7 +194,7 @@ jobs:
             }
 
             if (typeof minified !== "undefined") {
-              core.setOutput("minified_asset_id", minified_asset.id);
+              core.setOutput("minified_asset_id", minified.id);
             }
 
       - name: Update commit hash for ${{ matrix.version }} tag
