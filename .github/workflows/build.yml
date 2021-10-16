@@ -347,13 +347,35 @@ jobs:
             -Wait
 
           cd p5-net-ssleay
-          echo n | perl Makefile.PL
 
-          Start-Process `
+          $make_in = New-TemporaryFile
+
+          echo n | Out-File `
+            -FilePath $make_in `
+            -NoNewline
+
+          $proc_makefile = Start-Process `
+            -FilePath "C:\strawberry\perl\bin\perl.exe" `
+            -ArgumentList "Makefile.PL" `
+            -RedirectStandardInput $make_in `
+            -NoNewWindow `
+            -Wait `
+            -PassThru
+
+          if ($proc_makefile.ExitCode -ne 0) {
+            throw "`perl Makefile.PL` failed (exit code: $proc_makefile.ExitCode)"
+          }
+
+          $proc_build = Start-Process `
             -FilePath $make `
             -ArgumentList "test" `
             -NoNewWindow `
-            -Wait
+            -Wait `
+            -PassThru
+
+          if ($proc_build.ExitCode -ne 0) {
+            throw "`$make test` failed (exit code: $proc_build.ExitCode)"
+          }
 
           cd ..
 
