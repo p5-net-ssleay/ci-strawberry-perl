@@ -234,7 +234,7 @@ jobs:
                 target_commitish: context.sha,
               });
             } catch (e) {
-              console.log(require("util").inspect(e));
+              console.log(require("util").inspect(e, false, null));
               throw e;
             }
 
