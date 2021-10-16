@@ -244,6 +244,7 @@ jobs:
         run: |
           if ($Env:UPSTREAM_URL -eq "") {
             ($major, $minor, $patch, $build) = $Env:VERSION.Split(".")
+            Write-Output "$major, $minor, $patch, $build"
 
             $filename = switch ($Env:FLAVOUR) {
               "x64" {
