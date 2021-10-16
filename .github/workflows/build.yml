@@ -146,7 +146,7 @@ jobs:
           - { version: '5.12.0.1', flavour: x64 }
           - { version: '5.12.1.0', flavour: x64 }
           - { version: '5.12.2.0', flavour: x64 }
-          # Net-SSLeay support for all x86 flavours of versions between 5.30.0.1 and 5.30.2.1 has
+          # Net-SSLeay support for all 32bit flavours of versions between 5.30.0.1 and 5.30.2.1 has
           # been withdrawn because they ship with a broken copy of OpenSSL - see
           # https://github.com/radiator-software/p5-net-ssleay/issues/179
           - { version: '5.30.0.1', flavour: x86_64bitint }
@@ -173,7 +173,7 @@ jobs:
                 tag:   VERSION,
               })).data;
             } catch (e) {
-              if (e.status == 404 || e.status == 422) {
+              if (e.name == "HttpError" && (e.status == 404 || e.status == 422)) {
                 var r = (await github.rest.repos.createRelease({
                   owner:            context.repo.owner,
                   repo:             context.repo.repo,
@@ -226,12 +226,17 @@ jobs:
           RELEASE_ID: ${{ steps.release.outputs.release_id }}
         with:
           script: |
-            await github.rest.repos.updateRelease({
-              owner:            context.repo.owner,
-              repo:             context.repo.repo,
-              release_id:       process.env.RELEASE_ID,
-              target_commitish: context.sha,
-            });
+            try {
+              await github.rest.repos.updateRelease({
+                owner:            context.repo.owner,
+                repo:             context.repo.repo,
+                release_id:       process.env.RELEASE_ID,
+                target_commitish: context.sha,
+              });
+            } catch (e) {
+              console.log(JSON.stringify(e));
+              throw e;
+            }
 
       - name: Check out ci-strawberry-perl
         uses: actions/checkout@v2
