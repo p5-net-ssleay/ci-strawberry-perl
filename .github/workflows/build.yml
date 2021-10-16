@@ -343,8 +343,7 @@ jobs:
         run: |
           if ([System.Version]$Env:VERSION -ge [System.Version]"5.26.0.1") {
             $make = "C:\strawberry\c\bin\gmake.exe"
-          }
-          else {
+          } else {
             $make = "C:\strawberry\c\bin\dmake.exe"
           }
 
@@ -421,10 +420,13 @@ jobs:
             Copy-Item -Path $_ -Destination $dest
           }
 
-          Compress-Archive `
+          $minified = Compress-Archive `
             -Path strawberry-minified\* `
             -DestinationPath strawberry-minified.zip `
-            -CompressionLevel Optimal
+            -CompressionLevel Optimal `
+            -PassThru
+
+          Write-Output "Minified archive is {0} bytes ({1:n2} MB)" -f ($minified.Length, $minified.Length / 1MB)
 
       - name: Upload minified Strawberry Perl ${{ matrix.version }} ${{ matrix.flavour }} archive as release artifact
         uses: actions/github-script@v5
