@@ -338,8 +338,10 @@ jobs:
           }
 
       - name: Run Net-SSLeay test suite
+        env:
+          VERSION: ${{ matrix.version }}
         run: |
-          if ($major -ge 5 -and $minor -ge 26 -and $patch -ge 0 -and $build -ge 1) {
+          if ([System.Version]$Env:VERSION -ge [System.Version]"5.26.0.1") {
             $make = "C:\strawberry\c\bin\gmake.exe"
           }
           else {
