@@ -326,11 +326,11 @@ jobs:
 
       - name: Run Net-SSLeay test suite
         run: |
-          if (Test-Path -Path C:\strawberry\c\bin\dmake.exe -PathType Leaf) {
-            $make = "C:\strawberry\c\bin\dmake.exe"
+          if ($major -ge 5 -and $minor -ge 26 -and $patch -ge 0 -and $build -ge 1) {
+            $make = "C:\strawberry\c\bin\gmake.exe"
           }
           else {
-            $make = "C:\strawberry\c\bin\gmake.exe"
+            $make = "C:\strawberry\c\bin\dmake.exe"
           }
 
           $Env:Path = "C:\strawberry\perl\bin;C:\strawberry\c\bin;$Env:Path"
