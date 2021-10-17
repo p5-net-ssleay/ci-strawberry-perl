@@ -6,9 +6,58 @@ on:
       - master
 
 jobs:
+  update-releases:
+    name: Update GitHub releases
+    runs-on: ubuntu-latest
+    outputs:
+      releases: ${{ steps.releases.outputs.releases }}
+    steps:
+      - name: Update GitHub releases
+        id: releases
+        uses: actions/github-script@v5
+        with:
+          script: |
+            var releases = [];
+
+            github.paginate(
+              github.rest.repos.listReleases, {
+                owner: context.repo.owner,
+                repo:  context.repo.repo,
+              }
+            )
+            .then(r => {
+              releases = r;
+            });
+
+            core.setOutput("releases", JSON.stringify(releases));
+
+            releases.forEach(r => {
+              if (r.target_commitish == context.sha) {
+                console.log(`Strawberry Perl ${r.tag_name} (release ${r.id}): target commit hash up-to-date`);
+              } else {
+                console.log(`Strawberry Perl ${r.tag_name} (release ${r.id}): updating tag commit hash`);
+                await github.rest.git.updateRef({
+                  owner: context.repo.owner,
+                  repo:  context.repo.repo,
+                  ref:   `tags/${r.tag_name}`,
+                  sha:   context.sha,
+                  force: true,
+                });
+
+                console.log(`Strawberry Perl ${r.tag_name} (release ${r.id}): updating release commit hash`);
+                await github.rest.repos.updateRelease({
+                  owner:            context.repo.owner,
+                  repo:             context.repo.repo,
+                  release_id:       r.id,
+                  target_commitish: context.sha,
+                });
+              }
+            });
+
   build:
-    name: 'Strawberry Perl ${{ matrix.version }} ${{ matrix.flavour }}'
+    name: 'Build Strawberry Perl ${{ matrix.version }} ${{ matrix.flavour }}'
     runs-on: windows-2022
+    needs: update-releases
     strategy:
       fail-fast: false
       matrix:
@@ -156,36 +205,30 @@ jobs:
           - { version: '5.30.2.1', flavour: x86_64bitint }
           - { version: '5.30.2.1', flavour: x86_no64bitint }
     steps:
-      - name: Create GitHub release for Strawberry Perl ${{ matrix.version }}
+      - name: Get GitHub release details for Strawberry Perl ${{ matrix.version }}
         uses: actions/github-script@v5
         id: release
         env:
           VERSION: ${{ matrix.version }}
           FLAVOUR: ${{ matrix.flavour }}
+          RELEASES: ${{ needs.update-releases.outputs.releases }}
         with:
           script: |
-            const { VERSION, FLAVOUR } = process.env;
+            const { VERSION, FLAVOUR, RELEASES } = process.env;
 
-            try {
-              var r = (await github.rest.repos.getReleaseByTag({
-                owner: context.repo.owner,
-                repo:  context.repo.repo,
-                tag:   VERSION,
+            var r = JSON.parse(RELEASES).find(r => r.tag_name == VERSION);
+            if (typeof r === "undefined") {
+              console.log("No GitHub release found for this version; creating one");
+
+              r = (await github.rest.repos.createRelease({
+                owner:            context.repo.owner,
+                repo:             context.repo.repo,
+                tag_name:         VERSION,
+                target_commitish: context.sha,
+                name:             `Strawberry Perl ${VERSION}`,
+                draft:            false,
+                prerelease:       false,
               })).data;
-            } catch (e) {
-              if (e.name == "HttpError" && (e.status == 404 || e.status == 422)) {
-                var r = (await github.rest.repos.createRelease({
-                  owner:            context.repo.owner,
-                  repo:             context.repo.repo,
-                  tag_name:         VERSION,
-                  target_commitish: context.sha,
-                  name:             `Strawberry Perl ${VERSION}`,
-                  draft:            false,
-                  prerelease:       false,
-                })).data;
-              } else {
-                throw e;
-              }
             }
 
             const prefix = `strawberry-perl-${VERSION}-${FLAVOUR}`;
@@ -193,7 +236,6 @@ jobs:
             const minified = r.assets.find(a => a.name == `${prefix}.minified.zip`);
 
             core.setOutput("release_id", r.id);
-            core.setOutput("target_commit", r.target_commitish);
 
             if (typeof upstream !== "undefined") {
               core.setOutput("upstream_asset_id", upstream.id);
@@ -202,65 +244,6 @@ jobs:
 
             if (typeof minified !== "undefined") {
               core.setOutput("minified_asset_id", minified.id);
-            }
-
-      - name: Update commit hash for ${{ matrix.version }} tag
-        if: ${{ github.sha != steps.release.outputs.target_commit }}
-        uses: actions/github-script@v5
-        env:
-          VERSION: ${{ matrix.version }}
-        with:
-          script: |
-            try {
-              await github.rest.git.updateRef({
-                owner: context.repo.owner,
-                repo:  context.repo.repo,
-                ref:   `tags/${process.env.VERSION}`,
-                sha:   context.sha,
-                force: true,
-              });
-            } catch (e) {
-              if (
-                   e.name == "HttpError"
-                && e.status == 422
-                && e.response.data.message == "Reference cannot be updated"
-              ) {
-                // (Probably) no need to panic - the commit hash for this tag is likely already
-                // up-to-date (possibly updated by a job for another flavour in this release), and
-                // if anything went more seriously wrong, the next step will fail anyway
-                console.log("Failed to update commit hash for tag; assuming it is already correct");
-              } else {
-                throw e;
-              }
-            }
-
-      - name: Update target commit hash for GitHub release
-        if: ${{ github.sha != steps.release.outputs.target_commit }}
-        uses: actions/github-script@v5
-        env:
-          RELEASE_ID: ${{ steps.release.outputs.release_id }}
-        with:
-          script: |
-            try {
-              await github.rest.repos.updateRelease({
-                owner:            context.repo.owner,
-                repo:             context.repo.repo,
-                release_id:       process.env.RELEASE_ID,
-                target_commitish: context.sha,
-              });
-            } catch (e) {
-              if (
-                   e.name == "HttpError"
-                && e.status == 422
-                && e.response.data.errors[0].field == "tag_name"
-                && e.response.data.errors[0].code == "already_exists"
-              ) {
-                // No need to panic - the target commit hash for this release is already up-to-date
-                // (it was probably updated by a job for another flavour in this release)
-                console.log("Target commit hash is already up-to-date; skipping");
-              } else {
-                throw e;
-              }
             }
 
       - name: Check out ci-strawberry-perl
