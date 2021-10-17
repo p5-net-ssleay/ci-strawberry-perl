@@ -448,7 +448,7 @@ jobs:
           # seems to make it discard all file system activity and report only process and thread
           # activity - instead we need to check here whether the path exists (and also is a file,
           # since directory activity is also reported)
-          $files = Import-Csv test.csv | Where { Test-Path -Path $_.Path -PathType Leaf } | Foreach { $_.Path } | Sort | Unique
+          $files = Import-Csv test.csv | Where { Test-Path -Path $_.Path -PathType Leaf } | Foreach { $_.Path } | Sort -Unique
           Write-Output $files
 
           $files | Foreach {
