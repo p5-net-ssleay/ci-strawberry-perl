@@ -228,6 +228,7 @@ jobs:
                 // (Probably) no need to panic - the commit hash for this tag is likely already
                 // up-to-date (possibly updated by a job for another flavour in this release), and
                 // if anything went more seriously wrong, the next step will fail anyway
+                console.log("Failed to update commit hash for tag; assuming it is already correct");
               } else {
                 throw e;
               }
@@ -256,6 +257,7 @@ jobs:
               ) {
                 // No need to panic - the target commit hash for this release is already up-to-date
                 // (it was probably updated by a job for another flavour in this release)
+                console.log("Target commit hash is already up-to-date; skipping");
               } else {
                 throw e;
               }
