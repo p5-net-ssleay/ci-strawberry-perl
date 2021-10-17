@@ -222,9 +222,12 @@ jobs:
           script: |
             const { VERSION, FLAVOUR, RELEASE } = process.env;
 
-            try {
+            console.log(typeof RELEASE);
+            console.log(RELEASE);
+
+            if (typeof RELEASE !== "undefined") {
               var r = JSON.parse(RELEASE);
-            } catch {
+            } else {
               console.log("No GitHub release found for this version; creating one");
 
               var r = (await github.rest.repos.createRelease({
