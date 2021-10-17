@@ -31,28 +31,31 @@ jobs:
 
             core.setOutput("releases", JSON.stringify(releases));
 
-            releases.forEach(r => {
+            p = [];
+            for (const r of releases) {
               if (r.target_commitish == context.sha) {
                 console.log(`Strawberry Perl ${r.tag_name} (release ${r.id}): target commit hash up-to-date`);
               } else {
-                console.log(`Strawberry Perl ${r.tag_name} (release ${r.id}): updating tag commit hash`);
-                await github.rest.git.updateRef({
-                  owner: context.repo.owner,
-                  repo:  context.repo.repo,
-                  ref:   `tags/${r.tag_name}`,
-                  sha:   context.sha,
-                  force: true,
-                });
-
-                console.log(`Strawberry Perl ${r.tag_name} (release ${r.id}): updating release commit hash`);
-                await github.rest.repos.updateRelease({
-                  owner:            context.repo.owner,
-                  repo:             context.repo.repo,
-                  release_id:       r.id,
-                  target_commitish: context.sha,
-                });
+                p.push(
+                  github.rest.git.updateRef({
+                    owner: context.repo.owner,
+                    repo:  context.repo.repo,
+                    ref:   `tags/${r.tag_name}`,
+                    sha:   context.sha,
+                    force: true,
+                  })
+                  .then(_ => console.log(`Strawberry Perl ${r.tag_name} (release ${r.id}): updated tag commit hash`)),
+                  github.rest.repos.updateRelease({
+                    owner:            context.repo.owner,
+                    repo:             context.repo.repo,
+                    release_id:       r.id,
+                    target_commitish: context.sha,
+                  })
+                  .then(_ => console.log(`Strawberry Perl ${r.tag_name} (release ${r.id}): updated release commit hash`)),
+                );
               }
-            });
+            }
+            await Promise.all(p);
 
   build:
     name: 'Build Strawberry Perl ${{ matrix.version }} ${{ matrix.flavour }}'
