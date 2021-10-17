@@ -24,6 +24,7 @@ jobs:
               })
             );
 
+            console.log("releases:");
             console.log(require("util").inspect(releases));
             core.setOutput("releases", JSON.stringify(releases));
 
@@ -33,23 +34,6 @@ jobs:
                 console.log(`Strawberry Perl ${r.tag_name} (release ${r.id}): target commit hash up-to-date`);
               } else {
                 console.log(`Strawberry Perl ${r.tag_name} (release ${r.id}): updating target commit hash`);
-                p.push(
-                  github.rest.git.updateRef({
-                    owner: context.repo.owner,
-                    repo:  context.repo.repo,
-                    ref:   `tags/${r.tag_name}`,
-                    sha:   context.sha,
-                    force: true,
-                  })
-                  .then(_ => console.log(`Strawberry Perl ${r.tag_name} (release ${r.id}): updated tag commit hash`)),
-                  github.rest.repos.updateRelease({
-                    owner:            context.repo.owner,
-                    repo:             context.repo.repo,
-                    release_id:       r.id,
-                    target_commitish: context.sha,
-                  })
-                  .then(_ => console.log(`Strawberry Perl ${r.tag_name} (release ${r.id}): updated release commit hash`)),
-                );
               }
             }
             await Promise.all(p);
