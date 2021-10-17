@@ -30,14 +30,14 @@ jobs:
               console.log(
                 JSON.stringify({
                     id:     r.id,
-                    assets: Object.fromEntries(Object.entries(r.assets).filter(([k, _]) => k.match(/^(id|name|browser_download_url)$/))),
+                    assets: r.assets.map(a => Object.fromEntries(Object.entries(a).filter(([k, _]) => k.match(/^(id|name|browser_download_url)$/)))),
                 })
               );
               core.setOutput(
                 r.tag_name,  # Strawberry Perl version
                 JSON.stringify({
                     id:     r.id,
-                    assets: Object.fromEntries(Object.entries(r.assets).filter(([k, _]) => k.match(/^(id|name|browser_download_url)$/))),
+                    assets: r.assets.map(a => Object.fromEntries(Object.entries(a).filter(([k, _]) => k.match(/^(id|name|browser_download_url)$/)))),
                 })
               );
 
