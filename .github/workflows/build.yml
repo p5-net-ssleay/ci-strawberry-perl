@@ -202,9 +202,24 @@ jobs:
           - { version: '5.12.0.1', flavour: x64 }
           - { version: '5.12.1.0', flavour: x64 }
           - { version: '5.12.2.0', flavour: x64 }
-          # Net-SSLeay support for all 32bit flavours of versions between 5.30.0.1 and 5.30.2.1 has
-          # been withdrawn because they ship with a broken copy of OpenSSL - see
-          # https://github.com/radiator-software/p5-net-ssleay/issues/179
+          # Versions prior to 5.8.9.3 and 5.10.1.0 do not ship with a copy of OpenSSL
+          - { version: '5.8.8.2', flavour: x86_no64bitint }
+          - { version: '5.8.8.3', flavour: x86_no64bitint }
+          - { version: '5.8.8.4', flavour: x86_no64bitint }
+          - { version: '5.8.9.1', flavour: x86_no64bitint }
+          - { version: '5.8.9.2', flavour: x86_no64bitint }
+          - { version: '5.10.0.2', flavour: x86_no64bitint }
+          - { version: '5.10.0.3', flavour: x86_no64bitint }
+          - { version: '5.10.0.4', flavour: x86_no64bitint }
+          - { version: '5.10.0.5', flavour: x86_no64bitint }
+          - { version: '5.10.0.6', flavour: x86_no64bitint }
+          # Net-SSLeay support for the version of OpenSSL that ships with 64bit flavours of
+          # Strawberry Perl 5.12.3.0 has been withdrawn because it malfunctions - see
+          # https://github.com/radiator-software/p5-net-ssleay/issues/189
+          - { version: '5.12.3.0', flavour: x64 }
+          # Net-SSLeay support for the copies of OpenSSL that ship with 32bit flavours of Strawberry
+          # Perl versions between 5.30.0.1 and 5.30.2.1 has been withdrawn because of a build
+          # defect - see https://github.com/radiator-software/p5-net-ssleay/issues/179
           - { version: '5.30.0.1', flavour: x86_64bitint }
           - { version: '5.30.0.1', flavour: x86_no64bitint }
           - { version: '5.30.1.1', flavour: x86_64bitint }
