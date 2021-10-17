@@ -234,8 +234,17 @@ jobs:
                 target_commitish: context.sha,
               });
             } catch (e) {
-              console.log(require("util").inspect(e, false, null));
-              throw e;
+              if (
+                   e.name == "HttpError"
+                && e.status == 422
+                && e.data.errors[0].field == "tag_name"
+                && e.data.errors[0].code == "already_exists"
+              ) {
+                // No need to panic - the target commit hash for this release is already up-to-date
+                // (it was probably updated by a job for another flavour in this release)
+              } else {
+                throw e;
+              }
             }
 
       - name: Check out ci-strawberry-perl
