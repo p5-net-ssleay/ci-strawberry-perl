@@ -25,12 +25,22 @@ jobs:
               }
             );
 
-            console.log("releases:");
-            console.log(require("util").inspect(releases));
-            core.setOutput("releases", JSON.stringify(releases));
-
             p = [];
             for (const r of releases) {
+              console.log(
+                JSON.stringify({
+                    id:     r.id,
+                    assets: Object.fromEntries(Object.entries(r.assets).filter(([k, _]) => k.match(/^(id|name|browser_download_url)$/))),
+                })
+              );
+              core.setOutput(
+                r.tag_name,  # Strawberry Perl version
+                JSON.stringify({
+                    id:     r.id,
+                    assets: Object.fromEntries(Object.entries(r.assets).filter(([k, _]) => k.match(/^(id|name|browser_download_url)$/))),
+                })
+              );
+
               if (r.target_commitish == context.sha) {
                 console.log(`Strawberry Perl ${r.tag_name} (release ${r.id}): target commit hash up-to-date`);
               } else {
@@ -213,16 +223,17 @@ jobs:
         env:
           VERSION: ${{ matrix.version }}
           FLAVOUR: ${{ matrix.flavour }}
-          RELEASES: ${{ needs.update-releases.outputs.releases }}
+          RELEASE: ${{ needs.update-releases.outputs[matrix.version] }}
         with:
           script: |
-            const { VERSION, FLAVOUR, RELEASES } = process.env;
+            const { VERSION, FLAVOUR, RELEASE } = process.env;
 
-            var r = JSON.parse(RELEASES).find(r => r.tag_name == VERSION);
-            if (typeof r === "undefined") {
+            try {
+              var r = JSON.parse(RELEASE);
+            } catch {
               console.log("No GitHub release found for this version; creating one");
 
-              r = (await github.rest.repos.createRelease({
+              var r = (await github.rest.repos.createRelease({
                 owner:            context.repo.owner,
                 repo:             context.repo.repo,
                 tag_name:         VERSION,
