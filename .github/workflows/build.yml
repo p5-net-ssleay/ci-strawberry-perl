@@ -17,18 +17,14 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
-            var releases = [];
-
-            github.paginate(
+            var releases = await github.paginate(
               github.rest.repos.listReleases, {
                 owner: context.repo.owner,
                 repo:  context.repo.repo,
               }
-            )
-            .then(r => {
-              releases = r;
-            });
+            );
 
+            console.log(require("util").inspect(releases);
             core.setOutput("releases", JSON.stringify(releases));
 
             p = [];
