@@ -32,6 +32,7 @@ jobs:
               if (r.target_commitish == context.sha) {
                 console.log(`Strawberry Perl ${r.tag_name} (release ${r.id}): target commit hash up-to-date`);
               } else {
+                console.log(`Strawberry Perl ${r.tag_name} (release ${r.id}): updating target commit hash`);
                 p.push(
                   github.rest.git.updateRef({
                     owner: context.repo.owner,
