@@ -54,8 +54,7 @@ jobs:
       - name: Cache GitHub releases response
         uses: actions/cache@v2
         with:
-          path:
-            - releases.gh
+          path: releases.gh
           key: ${{ github.run_id }}-${{ github.run_attempt }}-gh-releases
 
   build:
@@ -212,8 +211,7 @@ jobs:
       - name: Restore GitHub releases response
         uses: actions/cache@v2
         with:
-          path:
-            - releases.gh
+          path: releases.gh
           key: ${{ github.run_id }}-${{ github.run_attempt }}-gh-releases
 
       - name: Get GitHub release details for Strawberry Perl ${{ matrix.version }}
