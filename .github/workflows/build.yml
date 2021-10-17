@@ -211,13 +211,27 @@ jobs:
           VERSION: ${{ matrix.version }}
         with:
           script: |
-            await github.rest.git.updateRef({
-              owner: context.repo.owner,
-              repo:  context.repo.repo,
-              ref:   `tags/${process.env.VERSION}`,
-              sha:   context.sha,
-              force: true,
-            });
+            try {
+              await github.rest.git.updateRef({
+                owner: context.repo.owner,
+                repo:  context.repo.repo,
+                ref:   `tags/${process.env.VERSION}`,
+                sha:   context.sha,
+                force: true,
+              });
+            } catch (e) {
+              if (
+                   e.name == "HttpError"
+                && e.status == 422
+                && e.data.message == "Reference cannot be updated"
+              ) {
+                // (Probably) no need to panic - the commit hash for this tag is likely already
+                // up-to-date (possibly updated by a job for another flavour in this release), and
+                // if anything went more seriously wrong, the next step will fail anyway
+              } else {
+                throw e;
+              }
+            }
 
       - name: Update target commit hash for GitHub release
         if: ${{ github.sha != steps.release.outputs.target_commit }}
