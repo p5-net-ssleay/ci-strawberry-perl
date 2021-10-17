@@ -223,7 +223,7 @@ jobs:
               if (
                    e.name == "HttpError"
                 && e.status == 422
-                && e.data.message == "Reference cannot be updated"
+                && e.response.data.message == "Reference cannot be updated"
               ) {
                 // (Probably) no need to panic - the commit hash for this tag is likely already
                 // up-to-date (possibly updated by a job for another flavour in this release), and
@@ -251,8 +251,8 @@ jobs:
               if (
                    e.name == "HttpError"
                 && e.status == 422
-                && e.data.errors[0].field == "tag_name"
-                && e.data.errors[0].code == "already_exists"
+                && e.response.data.errors[0].field == "tag_name"
+                && e.response.data.errors[0].code == "already_exists"
               ) {
                 // No need to panic - the target commit hash for this release is already up-to-date
                 // (it was probably updated by a job for another flavour in this release)
