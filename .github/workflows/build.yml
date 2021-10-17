@@ -24,7 +24,7 @@ jobs:
               })
             );
 
-            console.log(require("util").inspect(releases);
+            console.log(require("util").inspect(releases));
             core.setOutput("releases", JSON.stringify(releases));
 
             p = [];
