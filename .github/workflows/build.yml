@@ -445,7 +445,7 @@ jobs:
           Write-Output $files
 
           $files | Foreach {
-            $dest = $_.Replace("C:\strawberry\", "strawberry-minified\")
+            $dest = $_ -ireplace "^C:\\strawberry\\", "strawberry-minified\"
             $null = New-Item -Force $dest
             Copy-Item -Path $_ -Destination $dest
           }
