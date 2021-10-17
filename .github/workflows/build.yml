@@ -18,10 +18,10 @@ jobs:
         with:
           script: |
             var releases = await github.paginate(
-              github.rest.repos.listReleases, {
+              github.rest.repos.listReleases({
                 owner: context.repo.owner,
                 repo:  context.repo.repo,
-              }
+              })
             );
 
             console.log(require("util").inspect(releases);
