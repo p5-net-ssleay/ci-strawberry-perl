@@ -9,11 +9,8 @@ jobs:
   update-releases:
     name: Update GitHub releases
     runs-on: ubuntu-latest
-    outputs:
-      releases: ${{ steps.releases.outputs.releases }}
     steps:
       - name: Update GitHub releases
-        id: releases
         uses: actions/github-script@v5
         with:
           script: |
@@ -25,16 +22,10 @@ jobs:
               }
             );
 
+            require("fs").writeFileSync("releases.gh", JSON.stringify(releases));
+
             p = [];
             for (const r of releases) {
-              core.setOutput(
-                r.tag_name,  // Strawberry Perl version
-                JSON.stringify({
-                  id:     r.id,
-                  assets: r.assets.map(a => Object.fromEntries(Object.entries(a).filter(([k, _]) => k.match(/^(id|name|browser_download_url)$/)))),
-                })
-              );
-
               if (r.target_commitish == context.sha) {
                 console.log(`Strawberry Perl ${r.tag_name} (release ${r.id}): target commit hash up-to-date`);
               } else {
@@ -59,6 +50,13 @@ jobs:
               }
             }
             await Promise.all(p);
+
+      - name: Cache GitHub releases response
+        uses: actions/cache@v2
+        with:
+          path:
+            - releases.gh
+          key: ${{ github.run_id }}-${{ github.run_attempt }}-gh-releases
 
   build:
     name: 'Build Strawberry Perl ${{ matrix.version }} ${{ matrix.flavour }}'
@@ -211,26 +209,30 @@ jobs:
           - { version: '5.30.2.1', flavour: x86_64bitint }
           - { version: '5.30.2.1', flavour: x86_no64bitint }
     steps:
+      - name: Restore GitHub releases response
+        uses: actions/cache@v2
+        with:
+          path:
+            - releases.gh
+          key: ${{ github.run_id }}-${{ github.run_attempt }}-gh-releases
+
       - name: Get GitHub release details for Strawberry Perl ${{ matrix.version }}
         uses: actions/github-script@v5
         id: release
         env:
           VERSION: ${{ matrix.version }}
           FLAVOUR: ${{ matrix.flavour }}
-          RELEASE: ${{ needs.update-releases.outputs[matrix.version] }}
         with:
           script: |
-            const { VERSION, FLAVOUR, RELEASE } = process.env;
+            const { VERSION, FLAVOUR } = process.env;
 
-            console.log(typeof RELEASE);
-            console.log(RELEASE);
+            const releases = JSON.parse(require("fs").readFileSync("releases.gh"));
 
-            if (typeof RELEASE !== "undefined") {
-              var r = JSON.parse(RELEASE);
-            } else {
+            var r = releases.find(r => r.tag_name == VERSION);
+            if (typeof r === "undefined") {
               console.log("No GitHub release found for this version; creating one");
 
-              var r = (await github.rest.repos.createRelease({
+              r = (await github.rest.repos.createRelease({
                 owner:            context.repo.owner,
                 repo:             context.repo.repo,
                 tag_name:         VERSION,
