@@ -278,6 +278,12 @@ jobs:
           if ($Env:UPSTREAM_URL -eq "") {
             $version = [System.Version]$Env:VERSION
 
+            if ($version -lt [System.Version]"5.10.1.0") {
+              $dirname = $version.Split(".")[0..2] -Join "."
+            } else {
+              $dirname = $version
+            }
+
             $filename = switch ($Env:FLAVOUR) {
               "x64" {
                 if ($version -ge [System.Version]"5.12.3.0") {
@@ -312,7 +318,7 @@ jobs:
                 }
               }
             }
-            $url = "https://strawberryperl.com/download/$Env:VERSION/$filename"
+            $url = "https://strawberryperl.com/download/$dirname/$filename"
           } else {
             $url = $Env:UPSTREAM_URL
           }
