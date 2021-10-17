@@ -51,11 +51,12 @@ jobs:
             }
             await Promise.all(p);
 
-      - name: Cache GitHub releases response
-        uses: actions/cache@v2
+      - name: Upload GitHub releases response as artifact
+        uses: actions/upload-artifact@v2
         with:
+          name: github-releases
           path: releases.gh
-          key: ${{ github.run_id }}-${{ github.run_attempt }}-gh-releases
+          retention-days: 1
 
   build:
     name: 'Build Strawberry Perl ${{ matrix.version }} ${{ matrix.flavour }}'
@@ -208,11 +209,10 @@ jobs:
           - { version: '5.30.2.1', flavour: x86_64bitint }
           - { version: '5.30.2.1', flavour: x86_no64bitint }
     steps:
-      - name: Restore GitHub releases response
-        uses: actions/cache@v2
+      - name: Download GitHub releases response artifact
+        uses: actions/download-artifact@v2
         with:
-          path: releases.gh
-          key: ${{ github.run_id }}-${{ github.run_attempt }}-gh-releases
+          name: github-releases
 
       - name: Get GitHub release details for Strawberry Perl ${{ matrix.version }}
         uses: actions/github-script@v5
