@@ -279,9 +279,9 @@ jobs:
             $version = [System.Version]$Env:VERSION
 
             if ($version -lt [System.Version]"5.10.1.0") {
-              $dirname = $version.Split(".")[0..2] -Join "."
+              $dirname = $env:VERSION.Split(".")[0..2] -Join "."
             } else {
-              $dirname = $version
+              $dirname = $env:VERSION
             }
 
             $filename = switch ($Env:FLAVOUR) {
